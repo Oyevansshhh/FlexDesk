@@ -91,7 +91,7 @@ const [planForm, setPlanForm] = useState({name:'', price:'', duration_days:'30'}
     finally { setBusy(false); }
   }
 
-  async function addMember(e) {
+
     async function savePlan(e) {
   e.preventDefault();
   setError('');
@@ -163,6 +163,7 @@ const [planForm, setPlanForm] = useState({name:'', price:'', duration_days:'30'}
     setBusy(false);
   }
 
+  async function addMember(e) {
   async function markAttendance(memberId, status='present') {
     setError(''); setNotice('');
     const {error} = await supabase.from('attendance').upsert(
