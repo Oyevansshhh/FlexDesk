@@ -127,7 +127,31 @@ const [planForm, setPlanForm] = useState({name:'', price:'', duration_days:'30'}
       setBusy(false);
     }
   }
+async function deletePlan(plan) {
+  if (!window.confirm(`Delete ${plan.name}?`)) return;
 
+  setBusy(true);
+  setError('');
+  setNotice('');
+
+  try {
+    const { error } = await supabase
+      .from('membership_plans')
+      .delete()
+      .eq('id', plan.id)
+      .eq('gym_id', profile.gym_id);
+
+    if (error) throw error;
+
+    setNotice('Plan deleted successfully.');
+    await loadData();
+  } catch (e) {
+    setError(e.message || 'Could not delete plan.');
+  } finally {
+    setBusy(false);
+  }
+}
+  
   async function addMember(e) {
     e.preventDefault();
     setError('');
