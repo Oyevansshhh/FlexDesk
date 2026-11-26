@@ -102,6 +102,7 @@ const [planForm, setPlanForm] = useState({name:'', price:'', duration_days:'30'}
         phone: memberForm.phone.trim() || null,
         email: memberForm.email.trim() || null,
         plan_id: memberForm.plan_id || null,
+        plan_price: plans.find(p => p.id === memberForm.plan_id)?.price ?? null,
         membership_start: memberForm.membership_start || null,
         membership_end: memberForm.membership_end || null,
         created_by: session.user.id
