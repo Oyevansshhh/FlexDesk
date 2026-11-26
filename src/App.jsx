@@ -92,6 +92,43 @@ const [planForm, setPlanForm] = useState({name:'', price:'', duration_days:'30'}
   }
 
   async function addMember(e) {
+    async function savePlan(e) {
+  e.preventDefault();
+  setError('');
+  setNotice('');
+
+  if (!profile?.gym_id) return setError('Gym profile not ready.');
+  if (!planForm.name.trim() || Number(planForm.price) <= 0 || Number(planForm.duration_days) <= 0) {
+    return setError('Please enter valid plan details.');
+  }
+
+  setBusy(true);
+  try {
+    const payload = {
+      name: planForm.name.trim(),
+      price: Number(planForm.price),
+      duration_days: Number(planForm.duration_days)
+    };
+
+    const result = editingPlan
+      ? await supabase.from('membership_plans').update(payload)
+          .eq('id', editingPlan.id).eq('gym_id', profile.gym_id)
+      : await supabase.from('membership_plans')
+          .insert({ ...payload, gym_id: profile.gym_id });
+
+    if (result.error) throw result.error;
+
+    setShowPlan(false);
+    setEditingPlan(null);
+    setPlanForm({ name: '', price: '', duration_days: '30' });
+    setNotice(editingPlan ? 'Plan updated successfully.' : 'Plan added successfully.');
+    await loadData();
+  } catch (e) {
+    setError(e.message || 'Could not save plan.');
+  } finally {
+    setBusy(false);
+  }
+    }
     e.preventDefault(); setError(''); setNotice('');
     if (!profile?.gym_id) return setError('Gym profile is not ready. Refresh and try again.');
     setBusy(true);
