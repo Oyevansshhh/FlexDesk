@@ -322,6 +322,9 @@ async function deletePlan(plan) {
     }
   </div>
 </section>}
+          </main>
+  </div>;
+}
 
 function Stat({icon:Icon,label,value,note}) { return <div className="stat-card"><div className="stat-top"><span>{label}</span><div className="stat-icon"><Icon size={19}/></div></div><strong>{value}</strong><small>{note}</small></div>; }
 function Empty({text}) { return <div className="empty"><div className="empty-icon"><Activity/></div><p>{text}</p></div>; }
