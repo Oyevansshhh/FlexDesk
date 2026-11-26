@@ -252,12 +252,76 @@ async function deletePlan(plan) {
       {tab==='Members' && <section className="content"><div className="page-actions"><div><h2>Members</h2><p className="muted">Manage your gym’s member records.</p></div><button className="primary-btn" onClick={()=>setShowMember(true)}><Plus size={17}/> Add member</button></div><div className="panel"><div className="table-toolbar"><div className="searchbox"><Search size={17}/><input placeholder="Search name or phone…" value={search} onChange={e=>setSearch(e.target.value)}/></div><span className="muted">{filteredMembers.length} members</span></div><MemberTable rows={filteredMembers} onDelete={deleteMember}/></div></section>}
       {tab==='Payments' && <section className="content"><div className="page-actions"><div><h2>Payments</h2><p className="muted">Payment records for your gym.</p></div></div><div className="stats-grid"><Stat icon={Wallet} label="Total recorded" value={money(payments.filter(p=>p.status==='paid').reduce((s,p)=>s+Number(p.amount),0))} note="All-time paid payments"/><Stat icon={Activity} label="This month" value={money(monthlyRevenue)} note="Paid this month"/></div><div className="panel"><h3>Payment history</h3>{payments.length===0?<Empty text="No payments recorded yet. Payment entry will be added in the next build step."/>:<div className="table-wrap"><table><thead><tr><th>Date</th><th>Member ID</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead><tbody>{payments.map(p=><tr key={p.id}><td>{p.payment_date}</td><td className="mono">{p.member_id.slice(0,8)}…</td><td>{money(p.amount)}</td><td>{p.payment_method}</td><td><span className="status">{p.status}</span></td></tr>)}</tbody></table></div>}</div></section>}
       {tab==='Attendance' && <section className="content"><div className="page-actions"><div><h2>Attendance</h2><p className="muted">Mark members present for {new Date().toLocaleDateString('en-IN')}.</p></div></div><div className="panel"><div className="table-wrap"><table><thead><tr><th>Member</th><th>Phone</th><th>Today</th><th>Action</th></tr></thead><tbody>{members.map(m=>{const a=attendance.find(x=>x.member_id===m.id);return <tr key={m.id}><td><b>{m.full_name}</b></td><td>{m.phone||'—'}</td><td><span className={`status ${a?.status==='present'?'green':''}`}>{a?.status||'Not marked'}</span></td><td><button className="small-btn" onClick={()=>markAttendance(m.id,'present')}>Present</button> <button className="small-btn ghost" onClick={()=>markAttendance(m.id,'absent')}>Absent</button></td></tr>})}</tbody></table></div>{members.length===0&&<Empty text="Add members first to take attendance."/>}</div></section>}
-      {tab==='Plans' && <section className="content"><div className="page-actions"><div><h2>Membership plans</h2><p className="muted">Plans configured for your gym.</p></div></div><div className="panel">{plans.length===0?<Empty text="No membership plans yet. Plan creation will be enabled in the next build step."/>:<div className="plan-grid">{plans.map(p=><div className="plan-card" key={p.id}><span className="plan-tag">{p.duration_days} DAYS</span><h3>{p.name}</h3><strong>{money(p.price)}</strong></div>)}</div>}</div></section>}
-      <footer className="mobile-byline">Made with care <b>by Vansh ✦</b></footer>
-    </main>
-    {showMember && <div className="modal-backdrop" onClick={()=>setShowMember(false)}><form className="modal" onSubmit={addMember} onClick={e=>e.stopPropagation()}><div className="modal-head"><div><span className="eyebrow">MEMBER MANAGEMENT</span><h2>Add new member</h2></div><button type="button" className="icon-btn" onClick={()=>setShowMember(false)}><X/></button></div><label>Full name<input required value={memberForm.full_name} onChange={e=>setMemberForm({...memberForm,full_name:e.target.value})} placeholder="Member's full name"/></label><div className="form-grid"><label>Phone<input value={memberForm.phone} onChange={e=>setMemberForm({...memberForm,phone:e.target.value})} placeholder="Phone number"/></label><label>Email<input type="email" value={memberForm.email} onChange={e=>setMemberForm({...memberForm,email:e.target.value})} placeholder="Email (optional)"/></label></div><label>Membership plan<select value={memberForm.plan_id} onChange={e=>setMemberForm({...memberForm,plan_id:e.target.value})}><option value="">No plan selected</option>{plans.map(p=><option key={p.id} value={p.id}>{p.name} — {money(p.price)}</option>)}</select></label><div className="form-grid"><label>Start date<input type="date" value={memberForm.membership_start} onChange={e=>setMemberForm({...memberForm,membership_start:e.target.value})}/></label><label>End date<input type="date" value={memberForm.membership_end} onChange={e=>setMemberForm({...memberForm,membership_end:e.target.value})}/></label></div><div className="modal-actions"><button type="button" className="secondary-btn" onClick={()=>setShowMember(false)}>Cancel</button><button className="primary-btn" disabled={busy}>{busy?'Saving…':'Save member'}</button></div></form></div>}
-  </div>;
-}
+      {tab==='Plans' && <section className="content">
+  <div className="page-actions">
+    <div>
+      <h2>Membership plans</h2>
+      <p className="muted">Manage your gym membership plans.</p>
+    </div>
+    <button className="btn-primary" onClick={() => {
+      setEditingPlan(null);
+      setPlanForm({name:'',price:'',duration_days:'30'});
+      setShowPlan(true);
+    }}>
+      <Plus size={16}/> Add New Plan
+    </button>
+  </div>
+
+  {showPlan && <div className="panel">
+    <h3>{editingPlan ? 'Edit Plan' : 'Create New Plan'}</h3>
+    <form onSubmit={savePlan}>
+      <input
+        placeholder="Plan name"
+        value={planForm.name}
+        onChange={e=>setPlanForm({...planForm,name:e.target.value})}
+        required
+      />
+      <input
+        type="number"
+        placeholder="Price (₹)"
+        value={planForm.price}
+        onChange={e=>setPlanForm({...planForm,price:e.target.value})}
+        required
+      />
+      <input
+        type="number"
+        placeholder="Duration in days"
+        value={planForm.duration_days}
+        onChange={e=>setPlanForm({...planForm,duration_days:e.target.value})}
+        required
+      />
+      <button className="btn-primary" type="submit" disabled={busy}>
+        {busy ? 'Saving...' : 'Save Plan'}
+      </button>
+      <button type="button" onClick={()=>setShowPlan(false)}>Cancel</button>
+    </form>
+  </div>}
+
+  <div className="panel">
+    {plans.length===0
+      ? <Empty text="No membership plans yet. Add your first plan."/>
+      : <div className="plan-grid">
+        {plans.map(p=><div className="plan-card" key={p.id}>
+          <span className="plan-tag">{p.duration_days} DAYS</span>
+          <h3>{p.name}</h3>
+          <strong>{money(p.price)}</strong>
+          <div className="page-actions">
+            <button onClick={()=>{
+              setEditingPlan(p);
+              setPlanForm({
+                name:p.name,
+                price:String(p.price),
+                duration_days:String(p.duration_days)
+              });
+              setShowPlan(true);
+            }}>Edit</button>
+            <button onClick={()=>deletePlan(p)}>Delete</button>
+          </div>
+        </div>)}
+      </div>
+    }
+  </div>
+</section>}
 
 function Stat({icon:Icon,label,value,note}) { return <div className="stat-card"><div className="stat-top"><span>{label}</span><div className="stat-icon"><Icon size={19}/></div></div><strong>{value}</strong><small>{note}</small></div>; }
 function Empty({text}) { return <div className="empty"><div className="empty-icon"><Activity/></div><p>{text}</p></div>; }
