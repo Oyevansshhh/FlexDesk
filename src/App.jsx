@@ -30,6 +30,9 @@ export default function App() {
   const [showMember, setShowMember] = useState(false);
   const [memberForm, setMemberForm] = useState({full_name:'', phone:'', email:'', plan_id:'', membership_start:today, membership_end:''});
   const [mobileNav, setMobileNav] = useState(false);
+  const [showPlan, setShowPlan] = useState(false);
+const [editingPlan, setEditingPlan] = useState(null);
+const [planForm, setPlanForm] = useState({name:'', price:'', duration_days:'30'});
 
   useEffect(() => {
     if (!supabase) { setLoading(false); return; }
