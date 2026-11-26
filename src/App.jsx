@@ -238,6 +238,78 @@ async function deletePlan(plan) {
       <header className="topbar"><button className="menu-btn" onClick={()=>setMobileNav(true)}><Menu/></button><div><span className="eyebrow">WORKSPACE / {tab.toUpperCase()}</span><h1>{tab}</h1></div><div className="top-actions"><span className="today-pill">{new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</span><button className="icon-btn" onClick={loadData} title="Refresh"><RefreshCw size={17}/></button><div className="avatar">{(profile?.full_name || session.user.email || 'V').slice(0,1).toUpperCase()}</div></div></header>
       {error && <div className="alert error"><AlertCircle size={18}/>{error}<button onClick={()=>setError('')}>×</button></div>}
       {notice && <div className="alert success"><CheckCircle2 size={18}/>{notice}<button onClick={()=>setNotice('')}>×</button></div>}
+      
+{showMember && <section className="content">
+  <div className="panel">
+    <div className="page-actions">
+      <h2>Add New Member</h2>
+      <button type="button" onClick={() => setShowMember(false)}>
+        Cancel
+      </button>
+    </div>
+
+    <form onSubmit={addMember}>
+      <label>Full Name</label>
+      <input
+        required
+        placeholder="Member name"
+        value={memberForm.full_name}
+        onChange={e => setMemberForm({...memberForm, full_name:e.target.value})}
+      />
+
+      <label>Phone</label>
+      <input
+        placeholder="Phone number"
+        value={memberForm.phone}
+        onChange={e => setMemberForm({...memberForm, phone:e.target.value})}
+      />
+
+      <label>Email</label>
+      <input
+        type="email"
+        placeholder="Email address"
+        value={memberForm.email}
+        onChange={e => setMemberForm({...memberForm, email:e.target.value})}
+      />
+
+      <label>Membership Plan</label>
+      <select
+        value={memberForm.plan_id}
+        onChange={e => setMemberForm({...memberForm, plan_id:e.target.value})}
+      >
+        <option value="">Select Plan</option>
+        {plans.map(p => (
+          <option key={p.id} value={p.id}>
+            {p.name} - {money(p.price)}
+          </option>
+        ))}
+      </select>
+
+      <label>Membership Start</label>
+      <input
+        type="date"
+        value={memberForm.membership_start}
+        onChange={e => setMemberForm({...memberForm, membership_start:e.target.value})}
+      />
+
+      <label>Membership End</label>
+      <input
+        type="date"
+        value={memberForm.membership_end}
+        onChange={e => setMemberForm({...memberForm, membership_end:e.target.value})}
+      />
+
+      <button className="primary-btn" type="submit" disabled={busy}>
+        {busy ? 'Saving...' : 'Save Member'}
+      </button>
+
+      <button type="button" onClick={() => setShowMember(false)}>
+        Cancel
+      </button>
+    </form>
+  </div>
+</section>}
+      
       {tab==='Dashboard' && <section className="content">
         <div className="welcome-row"><div><p className="muted">OVERVIEW</p><h2>Welcome back, {profile?.full_name || 'there'}.</h2><p className="muted">Here’s what’s happening at {gym?.name || 'your gym'} today.</p></div><button className="primary-btn" onClick={()=>setShowMember(true)}><Plus size={17}/> Add member</button></div>
         <div className="stats-grid">
